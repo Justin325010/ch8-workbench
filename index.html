@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>热化学多场工业智能体工作台 · 静态演示版</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .kpi-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:26px; }
+    .kpi { background:var(--panel); border:1px solid var(--border); border-radius:12px; padding:16px 18px; }
+    .kpi .k { color:var(--muted); font-size:12px; letter-spacing:.5px; }
+    .kpi .v { font-size:26px; font-weight:800; margin-top:8px; color:#fff; }
+    .kpi .s { color:var(--muted); font-size:11px; margin-top:6px; }
+    .kpi.accent { border-top:3px solid var(--primary); }
+    .gallery { display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:14px; }
+    .gallery figure { margin:0; background:var(--panel); border:1px solid var(--border); border-radius:12px; overflow:hidden; }
+    .gallery img { width:100%; display:block; aspect-ratio:4/3; object-fit:cover; background:#080b0e; }
+    .gallery figcaption { padding:10px 12px; color:var(--muted); font-size:12px; }
+    .note { border:1px solid rgba(79,139,255,.4); background:rgba(79,139,255,.08); border-radius:12px; padding:14px 16px; font-size:12.5px; line-height:1.7; color:#cfe0ff; margin-top:20px; }
+    .note code { color:#fff; }
+    .section { margin-bottom:34px; }
+    @media (max-width:1100px){ .kpi-grid{ grid-template-columns:repeat(2,1fr);} }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">AI</div>
+        <div>
+          <h1>热化学多场智能体</h1>
+          <p>工业现场工作台</p>
+        </div>
+      </div>
+      <div class="project-switcher">
+        <label>现场项目</label>
+        <select disabled><option>甲醇燃烧现场 · 演示项目</option></select>
+      </div>
+      <nav class="stepper" id="stepper"></nav>
+      <div class="sidebar-foot">
+        <div class="status-line online"><span class="status-dot"></span><span id="engineStatus">静态演示版 · 数据已固化</span></div>
+        <div class="safety-note">本页面为 GitHub Pages 静态演示版<br/>完整后端请在本机运行 python app.py</div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div>
+          <div class="sub">ACTIVE PROJECT</div>
+          <h2 id="projectTitle">热化学多场工业智能体工作台</h2>
+        </div>
+        <div class="top-actions">
+          <span class="badge ok" id="gateBadge">● 只读演示模式</span>
+        </div>
+      </header>
+
+      <section class="section" id="s-overview">
+        <div class="section-head">
+          <div class="sub">OVERVIEW</div>
+          <h2>核心指标总览</h2>
+        </div>
+        <div class="kpi-grid" id="kpiGrid"></div>
+      </section>
+
+      <section class="section" id="s-field">
+        <div class="section-head">
+          <div class="sub">CORE TECHNOLOGY 1</div>
+          <h2>三维燃烧场重建 · 径向-轴向切片</h2>
+        </div>
+        <div class="toolbar">
+          <label>当量比 φ
+            <select id="phiSelect" class="control-select"></select>
+          </label>
+          <label>物理量
+            <select id="fieldSelect" class="control-select"></select>
+          </label>
+        </div>
+        <div class="plot medium" id="fieldPlot"></div>
+      </section>
+
+      <section class="section" id="s-radiation">
+        <div class="section-head">
+          <div class="sub">RADIATION</div>
+          <h2>辐射热流分布 q(z)</h2>
+        </div>
+        <div class="plot medium" id="radPlot"></div>
+      </section>
+
+      <section class="section" id="s-path">
+        <div class="section-head">
+          <div class="sub">CORE TECHNOLOGY 2</div>
+          <h2>反应路径诊断 · GNN 边贡献</h2>
+        </div>
+        <div class="plot medium" id="graphPlot"></div>
+        <div class="metric-line" style="margin-top:10px;"><span>关键路径 H₂O</span><strong id="pathH2O"></strong></div>
+        <div class="metric-line"><span>关键路径 CO₂</span><strong id="pathCO2"></strong></div>
+      </section>
+
+      <section class="section" id="s-sensor">
+        <div class="section-head">
+          <div class="sub">SENSOR DESIGN</div>
+          <h2>稀疏传感器布置 · 贪心搜索</h2>
+        </div>
+        <div class="plot medium" id="sensorPlot"></div>
+      </section>
+
+      <section class="section" id="s-mpc">
+        <div class="section-head">
+          <div class="sub">CORE TECHNOLOGY 3</div>
+          <h2>MPC 策略 · 沿轴向的温度与当量比</h2>
+        </div>
+        <div class="plot medium" id="mpcPlot"></div>
+        <div class="metric-line" style="margin-top:10px;"><span>贪心策略平均奖励</span><strong id="mpcGreedy"></strong></div>
+        <div class="metric-line"><span>相对 CO₂ 路径增益</span><strong id="mpcGain"></strong></div>
+      </section>
+
+      <section class="section" id="s-shots">
+        <div class="section-head">
+          <div class="sub">SNAPSHOTS</div>
+          <h2>工作台现场截图</h2>
+        </div>
+        <div class="gallery" id="gallery"></div>
+      </section>
+
+      <div class="note">
+        这是从本地 Flask 工作台 <code>D:\AI+energy code（1）\ch8_web_workbench</code> 提取数据的静态演示版，用于扫码浏览。
+        完整交互（数据接入、小模型训练、MPC 执行、现场助手）需要 Python 后端：进入该目录后运行 <code>python app.py</code>，访问 <code>http://127.0.0.1:8020/</code>。
+      </div>
+    </main>
+  </div>
+
+  <script src="vendor/plotly.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
